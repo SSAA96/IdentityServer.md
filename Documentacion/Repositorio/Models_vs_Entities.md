@@ -1,46 +1,38 @@
-# Entities vs Models en IdentityServer4
+# Entities vs Models en IdentityServer4: Una Guía Detallada
+
+## Introducción
+
+En IdentityServer4, la distinción entre Entities y Models es fundamental para entender cómo se manejan los datos y la lógica de negocio. Esta guía explora en detalle las características, usos y diferencias entre ambos conceptos.
 
 ## Entities
 
-- **Namespace**: `IdentityServer4.EntityFramework.Entities`
-- **Propósito**: Representación de tablas en la base de datos
-- **Uso principal**: Persistencia de datos y ORM
-- **Características**:
-  - Diseñadas para trabajar con Entity Framework Core
-  - Contienen propiedades adicionales para gestión de base de datos (ID, fechas de creación/modificación, etc.)
-  - Mapeo directo a tablas de la base de datos
+### Definición y Propósito
 
-## Models
+Entities en IdentityServer4 son clases que representan directamente las estructuras de datos en la base de datos. Están diseñadas para trabajar con Entity Framework Core y facilitar las operaciones de persistencia.
 
-- **Namespace**: `IdentityServer4.Models`
-- **Propósito**: Representación de dominio de conceptos de IdentityServer
-- **Uso principal**: Lógica de negocio y configuración de IdentityServer
-- **Características**:
-  - No están vinculados a mecanismos de persistencia
-  - Contienen solo propiedades relevantes para la lógica de IdentityServer
-  - Utilizados en la configuración y lógica de emisión de tokens
+### Características Principales
 
-## Diferencias Clave
+1. **Namespace**: `IdentityServer4.EntityFramework.Entities`
+2. **Estructura**: Clases POCO (Plain Old CLR Objects)
+3. **Mapeo**: Directo a tablas de la base de datos
+4. **Propiedades Adicionales**:
+   - Identificadores únicos (e.g., `Id`)
+   - Timestamps (e.g., `Created`, `Updated`)
+   - Propiedades de seguimiento y auditoría
 
-| Aspecto       | Entities                                    | Models                                      |
-|---------------|---------------------------------------------|---------------------------------------------|
-| Propósito     | Persistencia y ORM                          | Lógica de negocio y configuración           |
-| Propiedades   | Incluyen propiedades para base de datos     | Solo propiedades relevantes para la lógica  |
-| Uso           | Operaciones CRUD con Entity Framework Core  | Configuración de IdentityServer             |
-| Conversión    | `entity.ToModel()`                          | `model.ToEntity()`                          |
+### Ejemplos de Entities
 
-## Ejemplo de Uso
+- `Client`
+- `ApiResource`
+- `IdentityResource`
+- `PersistedGrant`
+
+### Uso Típico
 
 ```csharp
-// Uso de Entity
-var apiResourceEntity = await _context.ApiResources.FindAsync(id);
-
-// Conversión a Model
-var apiResourceModel = apiResourceEntity.ToModel();
-
-// Modificación del Model
-apiResourceModel.DisplayName = "Nuevo Nombre";
-
-// Conversión de vuelta a Entity
-var updatedEntity = apiResourceModel.ToEntity();
-_context.ApiResources.Update(updatedEntity);
+public async Task<Client> GetClientAsync(int id)
+{
+    return await _context.Clients
+        .Include(c => c.AllowedScopes)
+        .FirstOrDefaultAsync(c => c.Id == id);
+}
